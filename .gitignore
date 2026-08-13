@@ -1,0 +1,38 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Archivos generados por Python
+__pycache__/
+*.py[cod]
+
+# Configuracion de PyCharm
+.idea/
+
+# Archivos temporales de Excel
+~$*.xlsx
+~$*.xls
+
+# Configuracion y secretos
+.env
+*.env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Modelos generados por Machine Learning
+*.pkl
+*.joblib
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Datos procesados generados automaticamente
+data/processed/*.csv
