@@ -1,13 +1,14 @@
 # ============================================================
 # GESTOR DE DATOS
-# Proyecto: Predicción de la gravedad de accidentes de tránsito
+# Proyecto: Prediccion de la gravedad de accidentes de transito
 #
 # Este archivo contiene la clase encargada de:
 # 1. Localizar las carpetas del proyecto.
 # 2. Cargar el archivo CSV original.
 # 3. Limpiar y preparar los datos.
-# 4. Guardar el CSV procesado.
-# 5. Volver a cargar el archivo procesado para comprobarlo.
+# 4. Separar el numero y el nombre del dia y del mes.
+# 5. Guardar el CSV procesado.
+# 6. Volver a cargar el archivo procesado para comprobarlo.
 # ============================================================
 
 import os
@@ -26,7 +27,7 @@ class GestorDatos:
     # --------------------------------------------------------
     # CONSTRUCTOR DE LA CLASE
     #
-    # Identifica automáticamente la carpeta principal del
+    # Identifica automaticamente la carpeta principal del
     # proyecto y crea las rutas hacia data/raw y data/processed.
     # --------------------------------------------------------
 
@@ -34,7 +35,7 @@ class GestorDatos:
         """
         Define las rutas de las carpetas raw y processed.
 
-        La ruta se construye automáticamente para que el proyecto
+        La ruta se construye automaticamente para que el proyecto
         pueda ejecutarse en diferentes computadoras.
         """
 
@@ -69,18 +70,18 @@ class GestorDatos:
         os.makedirs(self.ruta_processed, exist_ok=True)
 
     # --------------------------------------------------------
-    # MÉTODO: CARGAR CSV ORIGINAL
+    # METODO: CARGAR CSV ORIGINAL
     #
     # Busca y carga un archivo CSV almacenado en data/raw.
-    # Devuelve los datos en forma de DataFrame de Pandas.
+    # Devuelve los datos como un DataFrame de Pandas.
     # --------------------------------------------------------
 
     def cargar_csv(self, nombre_archivo):
         """
         Carga un archivo CSV desde la carpeta data/raw.
 
-        Parámetro:
-            nombre_archivo: nombre del archivo CSV que se cargará.
+        Parametro:
+            nombre_archivo: nombre del archivo CSV que se cargara.
 
         Retorna:
             DataFrame con los datos originales.
@@ -95,7 +96,7 @@ class GestorDatos:
         # Comprobar que el archivo exista
         if not os.path.exists(ruta_completa):
             raise FileNotFoundError(
-                f"No se encontró el archivo: {ruta_completa}"
+                f"No se encontro el archivo: {ruta_completa}"
             )
 
         # Leer el archivo CSV con Pandas
@@ -109,24 +110,26 @@ class GestorDatos:
         return datos
 
     # --------------------------------------------------------
-    # MÉTODO: LIMPIAR DATOS
+    # METODO: LIMPIAR DATOS
     #
     # Realiza la limpieza inicial del DataFrame:
     # 1. Limpia los nombres de las columnas.
     # 2. Renombra las columnas.
     # 3. Elimina registros duplicados.
-    # 4. Crea la variable objetivo gravedad.
+    # 4. Separa el numero y el nombre del dia.
+    # 5. Separa el numero y el nombre del mes.
+    # 6. Crea la variable objetivo gravedad.
     # --------------------------------------------------------
 
     def limpiar_datos(self, datos):
         """
         Realiza la limpieza inicial de los datos.
 
-        Parámetro:
+        Parametro:
             datos: DataFrame original que se desea limpiar.
 
         Retorna:
-            DataFrame limpio con la variable gravedad.
+            DataFrame limpio y preparado para el proyecto.
         """
 
         # Crear una copia para no modificar los datos originales
@@ -172,17 +175,89 @@ class GestorDatos:
         # Eliminar filas completamente duplicadas
         datos_limpios = datos_limpios.drop_duplicates()
 
-        # Guardar la cantidad de filas después de la limpieza
+        # Guardar la cantidad de filas despues de la limpieza
         cantidad_despues = len(datos_limpios)
 
-        # Calcular cuántos duplicados fueron eliminados
+        # Calcular cuantos duplicados fueron eliminados
         duplicados_eliminados = (
             cantidad_antes - cantidad_despues
         )
 
-        # Crear la variable objetivo del modelo:
-        # 0 representa un accidente con heridos leves
-        # 1 representa un accidente con muertos o heridos graves
+        # ----------------------------------------------------
+        # LIMPIAR LA COLUMNA DIA
+        #
+        # Ejemplo original:
+        # 7.Sabado
+        #
+        # Resultado:
+        # dia_numero = 7
+        # dia = Sabado
+        # ----------------------------------------------------
+
+        dia_separado = datos_limpios["dia"].str.extract(
+            r"^(\d+)\.(.+)$"
+        )
+
+        # Guardar el numero del dia como entero
+        datos_limpios["dia_numero"] = (
+            dia_separado[0].astype(int)
+        )
+
+        # Conservar solamente el nombre del dia
+        datos_limpios["dia"] = (
+            dia_separado[1].str.strip()
+        )
+
+        # ----------------------------------------------------
+        # LIMPIAR LA COLUMNA MES
+        #
+        # Ejemplo original:
+        # D. Abril
+        #
+        # Resultado:
+        # mes_numero = 4
+        # mes = Abril
+        # ----------------------------------------------------
+
+        mes_separado = datos_limpios["mes"].str.extract(
+            r"^([A-L])\.\s*(.+)$"
+        )
+
+        # Relacionar cada letra con el numero del mes
+        numeros_meses = {
+            "A": 1,
+            "B": 2,
+            "C": 3,
+            "D": 4,
+            "E": 5,
+            "F": 6,
+            "G": 7,
+            "H": 8,
+            "I": 9,
+            "J": 10,
+            "K": 11,
+            "L": 12
+        }
+
+        # Convertir la letra del mes en su numero correspondiente
+        datos_limpios["mes_numero"] = (
+            mes_separado[0]
+            .map(numeros_meses)
+            .astype(int)
+        )
+
+        # Conservar solamente el nombre del mes
+        datos_limpios["mes"] = (
+            mes_separado[1].str.strip()
+        )
+
+        # ----------------------------------------------------
+        # CREAR LA VARIABLE OBJETIVO
+        #
+        # 0 = Solo heridos leves
+        # 1 = Con muertos o graves
+        # ----------------------------------------------------
+
         datos_limpios["gravedad"] = datos_limpios[
             "clase_accidente"
         ].map({
@@ -190,13 +265,49 @@ class GestorDatos:
             "Con muertos o graves": 1
         })
 
+        # ----------------------------------------------------
+        # ORDENAR LAS COLUMNAS
+        #
+        # Este orden se utilizara posteriormente para insertar
+        # los registros en SQL Server.
+        # ----------------------------------------------------
+
+        orden_columnas = [
+            "clase_accidente",
+            "tipo_accidente",
+            "anio",
+            "hora",
+            "hora_recodificada",
+            "provincia",
+            "canton",
+            "distrito",
+            "ruta",
+            "kilometro",
+            "zona",
+            "calzada_vertical",
+            "calzada_horizontal",
+            "tipo_calzada",
+            "tipo_circulacion",
+            "estado_tiempo",
+            "estado_calzada",
+            "region_mideplan",
+            "tipo_ruta",
+            "dia_numero",
+            "dia",
+            "mes_numero",
+            "mes",
+            "gravedad"
+        ]
+
+        datos_limpios = datos_limpios[orden_columnas]
+
         print("\nLimpieza inicial terminada.")
         print(f"Duplicados eliminados: {duplicados_eliminados}")
 
         return datos_limpios
 
     # --------------------------------------------------------
-    # MÉTODO: GUARDAR CSV PROCESADO
+    # METODO: GUARDAR CSV PROCESADO
     #
     # Guarda el DataFrame limpio como un nuevo archivo CSV
     # dentro de la carpeta data/processed.
@@ -210,9 +321,9 @@ class GestorDatos:
         """
         Guarda un DataFrame en la carpeta data/processed.
 
-        Parámetros:
+        Parametros:
             datos: DataFrame que se desea guardar.
-            nombre_archivo: nombre que tendrá el archivo generado.
+            nombre_archivo: nombre que tendra el archivo generado.
         """
 
         # Construir la ruta completa del archivo de salida
@@ -221,7 +332,7 @@ class GestorDatos:
             nombre_archivo
         )
 
-        # Guardar el DataFrame como archivo CSV
+        # Guardar el DataFrame como un archivo CSV
         datos.to_csv(
             ruta_completa,
             sep=";",
@@ -233,11 +344,10 @@ class GestorDatos:
         print(ruta_completa)
 
     # --------------------------------------------------------
-    # MÉTODO: CARGAR CSV PROCESADO
+    # METODO: CARGAR CSV PROCESADO
     #
     # Carga nuevamente el archivo guardado en data/processed.
-    # Este método se utiliza para comprobar que el archivo
-    # procesado se creó correctamente.
+    # Permite comprobar que el archivo se creo correctamente.
     # --------------------------------------------------------
 
     def cargar_csv_procesado(
@@ -247,7 +357,7 @@ class GestorDatos:
         """
         Carga un archivo CSV desde la carpeta data/processed.
 
-        Parámetro:
+        Parametro:
             nombre_archivo: nombre del archivo procesado.
 
         Retorna:
@@ -263,7 +373,7 @@ class GestorDatos:
         # Comprobar que el archivo procesado exista
         if not os.path.exists(ruta_completa):
             raise FileNotFoundError(
-                f"No se encontró el archivo procesado: "
+                f"No se encontro el archivo procesado: "
                 f"{ruta_completa}"
             )
 
