@@ -6,10 +6,11 @@
 # 1. Leer la configuracion de SQL Server.
 # 2. Crear la conexion con la base de datos.
 # 3. Comprobar que la conexion funciona.
-# 4. Contar los registros de la tabla accidentes.
+# 4. Contar los registros de las tablas.
 # 5. Insertar los accidentes procesados.
-# 6. Evitar cargas duplicadas.
-# 7. Cerrar la conexion correctamente.
+# 6. Insertar el resumen climatico mensual.
+# 7. Evitar cargas duplicadas.
+# 8. Cerrar la conexion correctamente.
 # ============================================================
 
 import os
@@ -140,7 +141,7 @@ class GestorBaseDatos:
         if self.conexion is None:
             self.conectar()
 
-        # Crear un cursor para ejecutar la consulta
+        # Crear un cursor
         cursor = self.conexion.cursor()
 
         # Consultar el nombre de la base de datos actual
@@ -156,8 +157,12 @@ class GestorBaseDatos:
 
         return resultado[0]
 
+    # ========================================================
+    # SECCION: TABLA DE ACCIDENTES
+    # ========================================================
+
     # --------------------------------------------------------
-    # METODO: CONTAR REGISTROS
+    # METODO: CONTAR REGISTROS DE ACCIDENTES
     #
     # Consulta la cantidad de registros almacenados
     # actualmente en la tabla dbo.accidentes.
@@ -168,7 +173,7 @@ class GestorBaseDatos:
         Cuenta los registros existentes en dbo.accidentes.
 
         Retorna:
-            Cantidad de registros almacenados.
+            Cantidad de accidentes almacenados.
         """
 
         # Conectarse si todavia no existe una conexion
@@ -207,14 +212,14 @@ class GestorBaseDatos:
             datos: DataFrame con los accidentes procesados.
 
         Retorna:
-            Cantidad de registros insertados.
+            Cantidad de accidentes insertados.
         """
 
         # Conectarse si todavia no existe una conexion
         if self.conexion is None:
             self.conectar()
 
-        # Comprobar si la tabla ya tiene registros
+        # Comprobar si la tabla ya contiene registros
         registros_actuales = self.contar_registros()
 
         if registros_actuales > 0:
@@ -227,8 +232,7 @@ class GestorBaseDatos:
 
             return 0
 
-        # Definir el orden exacto de las columnas que se
-        # insertaran en SQL Server
+        # Definir el orden exacto de las columnas
         columnas_insertar = [
             "clase_accidente",
             "tipo_accidente",
@@ -256,7 +260,7 @@ class GestorBaseDatos:
             "gravedad"
         ]
 
-        # Comprobar que el DataFrame tenga todas las columnas
+        # Comprobar que el DataFrame tenga las columnas
         columnas_faltantes = [
             columna
             for columna in columnas_insertar
@@ -323,7 +327,7 @@ class GestorBaseDatos:
         cursor.fast_executemany = True
 
         print(
-            f"\nIniciando carga de {len(filas)} registros "
+            f"\nIniciando carga de {len(filas)} accidentes "
             "en SQL Server..."
         )
 
@@ -335,11 +339,11 @@ class GestorBaseDatos:
                 filas
             )
 
-            # Confirmar los cambios en SQL Server
+            # Confirmar los cambios
             self.conexion.commit()
 
             print(
-                "Carga de datos terminada correctamente."
+                "Carga de accidentes terminada correctamente."
             )
 
             cantidad_insertada = len(filas)
@@ -350,12 +354,11 @@ class GestorBaseDatos:
             self.conexion.rollback()
 
             print(
-                "Ocurrio un error durante la carga."
+                "Ocurrio un error durante la carga "
+                "de accidentes."
             )
 
-            print(
-                "Los cambios fueron cancelados."
-            )
+            print("Los cambios fueron cancelados.")
 
             raise
 
@@ -365,6 +368,192 @@ class GestorBaseDatos:
             cursor.close()
 
         return cantidad_insertada
+
+    # ========================================================
+    # SECCION: TABLA DE CLIMA MENSUAL
+    # ========================================================
+
+    # --------------------------------------------------------
+    # METODO: CONTAR REGISTROS CLIMATICOS
+    #
+    # Consulta la cantidad de registros almacenados
+    # actualmente en dbo.clima_mensual.
+    # --------------------------------------------------------
+
+    def contar_registros_clima(self):
+        """
+        Cuenta los registros existentes en dbo.clima_mensual.
+
+        Retorna:
+            Cantidad de registros climaticos almacenados.
+        """
+
+        # Conectarse si todavia no existe una conexion
+        if self.conexion is None:
+            self.conectar()
+
+        # Crear un cursor
+        cursor = self.conexion.cursor()
+
+        # Contar los registros climaticos
+        cursor.execute(
+            "SELECT COUNT(*) FROM dbo.clima_mensual"
+        )
+
+        # Recuperar la cantidad
+        cantidad = cursor.fetchone()[0]
+
+        # Cerrar el cursor
+        cursor.close()
+
+        return cantidad
+
+    # --------------------------------------------------------
+    # METODO: INSERTAR CLIMA MENSUAL
+    #
+    # Inserta las ocho columnas del resumen climatico.
+    # La columna id_clima no se incluye porque SQL Server
+    # la genera automaticamente.
+    # --------------------------------------------------------
+
+    def insertar_clima_mensual(self, datos_clima):
+        """
+        Inserta el resumen climatico en dbo.clima_mensual.
+
+        Parametro:
+            datos_clima: DataFrame con el resumen mensual.
+
+        Retorna:
+            Cantidad de registros climaticos insertados.
+        """
+
+        # Conectarse si todavia no existe una conexion
+        if self.conexion is None:
+            self.conectar()
+
+        # Comprobar si la tabla ya contiene registros
+        registros_actuales = self.contar_registros_clima()
+
+        if registros_actuales > 0:
+            print(
+                "\nLa tabla clima_mensual ya contiene "
+                f"{registros_actuales} registros."
+            )
+
+            print(
+                "No se realizara una nueva carga climatica."
+            )
+
+            return 0
+
+        # Definir el orden exacto de las columnas
+        columnas_insertar = [
+            "provincia",
+            "anio",
+            "mes_numero",
+            "mes",
+            "precipitacion_total_mm",
+            "precipitacion_promedio_mm",
+            "precipitacion_maxima_mm",
+            "dias_con_lluvia"
+        ]
+
+        # Comprobar que el DataFrame tenga las columnas
+        columnas_faltantes = [
+            columna
+            for columna in columnas_insertar
+            if columna not in datos_clima.columns
+        ]
+
+        if columnas_faltantes:
+            raise ValueError(
+                "Faltan estas columnas climaticas: "
+                f"{columnas_faltantes}"
+            )
+
+        # Seleccionar las columnas en el orden correcto
+        datos_insertar = datos_clima[columnas_insertar]
+
+        # Consulta para insertar las ocho columnas
+        consulta = """
+        INSERT INTO dbo.clima_mensual
+        (
+            provincia,
+            anio,
+            mes_numero,
+            mes,
+            precipitacion_total_mm,
+            precipitacion_promedio_mm,
+            precipitacion_maxima_mm,
+            dias_con_lluvia
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?, ?, ?, ?
+        )
+        """
+
+        # Convertir el DataFrame en una lista de filas
+        filas = list(
+            datos_insertar.itertuples(
+                index=False,
+                name=None
+            )
+        )
+
+        # Crear un cursor
+        cursor = self.conexion.cursor()
+
+        # Acelerar la insercion
+        cursor.fast_executemany = True
+
+        print(
+            f"\nIniciando carga de {len(filas)} registros "
+            "climaticos en SQL Server..."
+        )
+
+        try:
+
+            # Insertar todos los registros
+            cursor.executemany(
+                consulta,
+                filas
+            )
+
+            # Confirmar los cambios
+            self.conexion.commit()
+
+            print(
+                "Carga de datos climaticos terminada "
+                "correctamente."
+            )
+
+            cantidad_insertada = len(filas)
+
+        except Exception:
+
+            # Cancelar la carga completa si ocurre un error
+            self.conexion.rollback()
+
+            print(
+                "Ocurrio un error durante la carga "
+                "de datos climaticos."
+            )
+
+            print("Los cambios fueron cancelados.")
+
+            raise
+
+        finally:
+
+            # Cerrar el cursor
+            cursor.close()
+
+        return cantidad_insertada
+
+    # ========================================================
+    # SECCION: CIERRE DE LA CONEXION
+    # ========================================================
 
     # --------------------------------------------------------
     # METODO: CERRAR CONEXION
