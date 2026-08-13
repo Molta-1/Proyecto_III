@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_b67e246687aec597d9d0ef3798d3e294 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+        <div style="
+            position: fixed;
+            top: 10px;
+            left: 50px;
+            width: 430px;
+            z-index: 9999;
+            background-color: white;
+            border: 2px solid #1F4E78;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: Arial;
+            font-size: 16px;
+            text-align: center;
+        ">
+            <b>
+                Accidentes de tránsito por provincia
+            </b>
+            <br>
+            <span style="font-size: 12px;">
+                Costa Rica, periodo 2018-2024
+            </span>
+        </div>
+        
+    
+        <div style="
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 240px;
+            z-index: 9999;
+            background-color: white;
+            border: 2px solid gray;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: Arial;
+            font-size: 12px;
+        ">
+            <b>Porcentaje de accidentes graves</b>
+            <br><br>
+
+            <span style="color: green;">●</span>
+            Menos de 14 %
+            <br>
+
+            <span style="color: orange;">●</span>
+            Entre 14 % y 16,99 %
+            <br>
+
+            <span style="color: red;">●</span>
+            Entre 17 % y 19,99 %
+            <br>
+
+            <span style="color: darkred;">●</span>
+            20 % o más
+            <br><br>
+
+            <small>
+                El tamaño representa el total de accidentes.
+            </small>
+        </div>
+        
+    
+            <div class="folium-map" id="map_b67e246687aec597d9d0ef3798d3e294" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_b67e246687aec597d9d0ef3798d3e294 = L.map(
+                "map_b67e246687aec597d9d0ef3798d3e294",
+                {
+                    center: [9.95, -84.15],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 8,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_b26239acb2c7962d291dea365f3daad5 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b26239acb2c7962d291dea365f3daad5.addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+            var circle_marker_f70220ff6f7a5c1c93eec1fafcda0989 = L.circleMarker(
+                [10.63517, -85.43779],
+                {"bubblingMouseEvents": true, "color": "darkred", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "darkred", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 12.86, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_61faa71d143af336fa1ed3fc7a017434 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_22a7868be1cefe60ba6c871071fbb60a = $(`<div id="html_22a7868be1cefe60ba6c871071fbb60a" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Guanacaste                 </h3>                  <b>Total de accidentes:</b>                 8,125                 <br>                  <b>Accidentes leves:</b>                 5,085                 <br>                  <b>Accidentes graves:</b>                 3,040                 <br>                  <b>Porcentaje grave:</b>                 37.42 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_61faa71d143af336fa1ed3fc7a017434.setContent(html_22a7868be1cefe60ba6c871071fbb60a);
+            
+        
+
+        circle_marker_f70220ff6f7a5c1c93eec1fafcda0989.bindPopup(popup_61faa71d143af336fa1ed3fc7a017434)
+        ;
+
+        
+    
+    
+            circle_marker_f70220ff6f7a5c1c93eec1fafcda0989.bindTooltip(
+                `<div>
+                     Guanacaste: 8,125 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a3f4959730c77bc5d7d4b50071168073 = L.circleMarker(
+                [9.99074, -83.03596],
+                {"bubblingMouseEvents": true, "color": "darkred", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "darkred", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 12.78, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_6243e1983f32e3a011addd1ff95e162b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_815412b7200492cb786083284531dcd6 = $(`<div id="html_815412b7200492cb786083284531dcd6" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Limón                 </h3>                  <b>Total de accidentes:</b>                 7,988                 <br>                  <b>Accidentes leves:</b>                 5,608                 <br>                  <b>Accidentes graves:</b>                 2,380                 <br>                  <b>Porcentaje grave:</b>                 29.79 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_6243e1983f32e3a011addd1ff95e162b.setContent(html_815412b7200492cb786083284531dcd6);
+            
+        
+
+        circle_marker_a3f4959730c77bc5d7d4b50071168073.bindPopup(popup_6243e1983f32e3a011addd1ff95e162b)
+        ;
+
+        
+    
+    
+            circle_marker_a3f4959730c77bc5d7d4b50071168073.bindTooltip(
+                `<div>
+                     Limón: 7,988 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7caf83047457106af53e5972447a54ae = L.circleMarker(
+                [9.97691, -84.8379],
+                {"bubblingMouseEvents": true, "color": "darkred", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "darkred", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 14.91, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_53b3b392aba1a7ebf6663c3366d7ca71 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_fecdc60767670d2a6babc76f9e737de1 = $(`<div id="html_fecdc60767670d2a6babc76f9e737de1" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Puntarenas                 </h3>                  <b>Total de accidentes:</b>                 11,548                 <br>                  <b>Accidentes leves:</b>                 9,159                 <br>                  <b>Accidentes graves:</b>                 2,389                 <br>                  <b>Porcentaje grave:</b>                 20.69 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_53b3b392aba1a7ebf6663c3366d7ca71.setContent(html_fecdc60767670d2a6babc76f9e737de1);
+            
+        
+
+        circle_marker_7caf83047457106af53e5972447a54ae.bindPopup(popup_53b3b392aba1a7ebf6663c3366d7ca71)
+        ;
+
+        
+    
+    
+            circle_marker_7caf83047457106af53e5972447a54ae.bindTooltip(
+                `<div>
+                     Puntarenas: 11,548 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4bd63b524f5e5c34dd5ec2b7b40fc1f9 = L.circleMarker(
+                [10.01723, -84.21275],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20.44, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_2bff4fd7854f8066720fd544a8e379aa = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_eaa31a1d4d0ae10f10190dcf6d05d17a = $(`<div id="html_eaa31a1d4d0ae10f10190dcf6d05d17a" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Alajuela                 </h3>                  <b>Total de accidentes:</b>                 20,802                 <br>                  <b>Accidentes leves:</b>                 18,215                 <br>                  <b>Accidentes graves:</b>                 2,587                 <br>                  <b>Porcentaje grave:</b>                 12.44 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_2bff4fd7854f8066720fd544a8e379aa.setContent(html_eaa31a1d4d0ae10f10190dcf6d05d17a);
+            
+        
+
+        circle_marker_4bd63b524f5e5c34dd5ec2b7b40fc1f9.bindPopup(popup_2bff4fd7854f8066720fd544a8e379aa)
+        ;
+
+        
+    
+    
+            circle_marker_4bd63b524f5e5c34dd5ec2b7b40fc1f9.bindTooltip(
+                `<div>
+                     Alajuela: 20,802 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_8df8ec035a92271f1fdd1fe26e468903 = L.circleMarker(
+                [9.86371, -83.9195],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 13.6, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_934256f6a53ae71b86ab15b163ad8032 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bd64958db8a06e1a65cf05d9f46c33b5 = $(`<div id="html_bd64958db8a06e1a65cf05d9f46c33b5" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Cartago                 </h3>                  <b>Total de accidentes:</b>                 9,357                 <br>                  <b>Accidentes leves:</b>                 8,461                 <br>                  <b>Accidentes graves:</b>                 896                 <br>                  <b>Porcentaje grave:</b>                 9.58 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_934256f6a53ae71b86ab15b163ad8032.setContent(html_bd64958db8a06e1a65cf05d9f46c33b5);
+            
+        
+
+        circle_marker_8df8ec035a92271f1fdd1fe26e468903.bindPopup(popup_934256f6a53ae71b86ab15b163ad8032)
+        ;
+
+        
+    
+    
+            circle_marker_8df8ec035a92271f1fdd1fe26e468903.bindTooltip(
+                `<div>
+                     Cartago: 9,357 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_27c8c243d677643d4cd688a2cd3388d8 = L.circleMarker(
+                [9.99872, -84.11587],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 14.11, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_611815a9ba5ed8c8aab02233b3f57b0d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9f579c03ce59dcbb9aad7f2ce74ef122 = $(`<div id="html_9f579c03ce59dcbb9aad7f2ce74ef122" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     Heredia                 </h3>                  <b>Total de accidentes:</b>                 10,221                 <br>                  <b>Accidentes leves:</b>                 9,332                 <br>                  <b>Accidentes graves:</b>                 889                 <br>                  <b>Porcentaje grave:</b>                 8.70 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_611815a9ba5ed8c8aab02233b3f57b0d.setContent(html_9f579c03ce59dcbb9aad7f2ce74ef122);
+            
+        
+
+        circle_marker_27c8c243d677643d4cd688a2cd3388d8.bindPopup(popup_611815a9ba5ed8c8aab02233b3f57b0d)
+        ;
+
+        
+    
+    
+            circle_marker_27c8c243d677643d4cd688a2cd3388d8.bindTooltip(
+                `<div>
+                     Heredia: 10,221 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bc5bc99cb35bc986e06004cf03e37dc4 = L.circleMarker(
+                [9.93388, -84.08489],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.65, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 30.0, "stroke": true, "weight": 2}
+            ).addTo(map_b67e246687aec597d9d0ef3798d3e294);
+        
+    
+        var popup_0363d4b359c7fde1cd37aeef0bfea5fa = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bcfe8112a0afe10061447876a5ca0cea = $(`<div id="html_bcfe8112a0afe10061447876a5ca0cea" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 240px;">                 <h3 style="margin-bottom: 8px;">                     San José                 </h3>                  <b>Total de accidentes:</b>                 36,780                 <br>                  <b>Accidentes leves:</b>                 33,681                 <br>                  <b>Accidentes graves:</b>                 3,099                 <br>                  <b>Porcentaje grave:</b>                 8.43 %                 <br>                  <hr>                  <small>                     Periodo analizado: 2018-2024                 </small>             </div>             </div>`)[0];
+                popup_0363d4b359c7fde1cd37aeef0bfea5fa.setContent(html_bcfe8112a0afe10061447876a5ca0cea);
+            
+        
+
+        circle_marker_bc5bc99cb35bc986e06004cf03e37dc4.bindPopup(popup_0363d4b359c7fde1cd37aeef0bfea5fa)
+        ;
+
+        
+    
+    
+            circle_marker_bc5bc99cb35bc986e06004cf03e37dc4.bindTooltip(
+                `<div>
+                     San José: 36,780 accidentes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>
