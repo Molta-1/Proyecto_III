@@ -1,38 +1,100 @@
-# Entorno virtual
+# ============================================================
+# ARCHIVO GITIGNORE
+# Proyecto: Prediccion de la gravedad de accidentes de transito
+#
+# Este archivo evita subir configuraciones locales,
+# archivos temporales y resultados generados automaticamente.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# ENTORNOS VIRTUALES DE PYTHON
+# ------------------------------------------------------------
+
 .venv/
 venv/
 env/
 
-# Archivos generados por Python
+
+# ------------------------------------------------------------
+# ARCHIVOS GENERADOS POR PYTHON
+# ------------------------------------------------------------
+
 __pycache__/
 *.py[cod]
 
-# Configuracion de PyCharm
+
+# ------------------------------------------------------------
+# CONFIGURACION LOCAL DE PYCHARM
+# ------------------------------------------------------------
+
 .idea/
 
-# Archivos temporales de Excel
+
+# ------------------------------------------------------------
+# ARCHIVOS TEMPORALES DE EXCEL
+# ------------------------------------------------------------
+
 ~$*.xlsx
 ~$*.xls
 
-# Configuracion y secretos
+
+# ------------------------------------------------------------
+# CONFIGURACION PRIVADA Y SECRETOS
+#
+# El archivo .env contiene la configuracion local
+# de SQL Server y no debe compartirse.
+# ------------------------------------------------------------
+
 .env
 *.env
 
-# Jupyter Notebook
+
+# ------------------------------------------------------------
+# ARCHIVOS TEMPORALES DE JUPYTER
+# ------------------------------------------------------------
+
 .ipynb_checkpoints/
 
-# Archivos del sistema operativo
+
+# ------------------------------------------------------------
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ------------------------------------------------------------
+
 .DS_Store
 Thumbs.db
 
-# Modelos generados por Machine Learning
-*.pkl
-*.joblib
 
-# Bases de datos locales
+# ------------------------------------------------------------
+# BASES DE DATOS LOCALES
+#
+# El proyecto utiliza SQL Server, por lo que estos archivos
+# corresponden solamente a posibles bases locales.
+# ------------------------------------------------------------
+
 *.db
 *.sqlite
 *.sqlite3
 
-# Datos procesados generados automaticamente
+
+# ------------------------------------------------------------
+# ARCHIVOS PROCESADOS GENERADOS POR EL PROGRAMA
+#
+# Estos CSV se generan automaticamente al ejecutar main.py.
+# La carpeta se conserva mediante data/processed/.gitkeep.
+# ------------------------------------------------------------
+
 data/processed/*.csv
+
+
+# ------------------------------------------------------------
+# MODELOS GENERADOS POR MACHINE LEARNING
+#
+# Se ignoran los modelos temporales y se permite solamente
+# el Pipeline final utilizado por Streamlit.
+# ------------------------------------------------------------
+
+*.pkl
+*.joblib
+
+!modelos_entrenados/modelo_gravedad_accidentes.joblib

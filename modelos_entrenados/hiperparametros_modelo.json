@@ -1,0 +1,9 @@
+{
+    "modelo_seleccionado": "Arbol de Decision Optimizado",
+    "hiperparametros": {
+        "modelo__criterion": "entropy",
+        "modelo__max_depth": 6,
+        "modelo__min_samples_leaf": 5,
+        "modelo__min_samples_split": 10
+    }
+}
