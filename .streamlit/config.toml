@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#6FCF97"          # Color principal (botones, sliders, etc.)
+backgroundColor = "#1F6F5F"       # Color del fondo de la página
+secondaryBackgroundColor = "#2FA084" # Color de fondo del sidebar y tarjetas
+textColor = "#EEEEEE"             # Color del texto
+font = "sans serif"               # Fuente del texto (sans serif, serif o monospace)

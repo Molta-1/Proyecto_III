@@ -1,15 +1,3 @@
-# ============================================================
-# GESTOR DE DATOS
-# Proyecto: Prediccion de la gravedad de accidentes de transito
-#
-# Este archivo contiene la clase encargada de:
-# 1. Localizar las carpetas del proyecto.
-# 2. Cargar el archivo CSV original.
-# 3. Limpiar y preparar los datos.
-# 4. Separar el numero y el nombre del dia y del mes.
-# 5. Guardar el CSV procesado.
-# 6. Volver a cargar el archivo procesado para comprobarlo.
-# ============================================================
 
 import os
 import pandas as pd

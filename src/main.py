@@ -1,61 +1,29 @@
-# ============================================================
-# PROGRAMA PRINCIPAL
-# Proyecto: Prediccion de la gravedad de accidentes de transito
-#
-# Este archivo coordina el flujo principal del proyecto:
-# 1. Carga y limpia el CSV de accidentes.
-# 2. Guarda y comprueba el CSV procesado.
-# 3. Consulta o carga los datos climaticos.
-# 4. Crea el resumen climatico mensual.
-# 5. Guarda el resumen climatico.
-# 6. Se conecta con SQL Server.
-# 7. Carga los accidentes.
-# 8. Carga los datos climaticos.
-# 9. Comprueba ambas tablas.
-# 10. Cierra la conexion.
-# ============================================================
-
-import os
-import pandas as pd
+import os # Librería que permite interración con el sistema operativo
+import pandas as pd # Librería para manejo de datos
 
 from datos.GestorDatos import GestorDatos
 from api.ClienteAPI import ClienteAPI
 from basedatos.GestorBaseDatos import GestorBaseDatos
+from eda.ProcesadorEDA import ProcesadorEDA
+from visualizacion.MapaAccidentes import MapaAccidentes
+from modelos.PreparadorModelo import PreparadorModelo
+from modelos.EntrenadorModelos import EntrenadorModelos
+from modelos.GuardadorModelo import GuardadorModelo
+# Llamado de las distintas clases del proyecto
 
-
-# ============================================================
-# FUNCION PRINCIPAL
-#
-# Ejecuta en orden el procesamiento de accidentes,
-# la integracion climatica y la carga en SQL Server.
-# ============================================================
 
 def main():
-    """
-    Ejecuta el flujo principal de datos del proyecto.
-    """
-
-    # ========================================================
-    # SECCION 1: PROCESAMIENTO DE ACCIDENTES
-    # ========================================================
-
-    print("\n====================================================")
-    print("PROCESAMIENTO DE LOS DATOS DE ACCIDENTES")
-    print("====================================================")
-
-    # --------------------------------------------------------
-    # PASO 1: CREAR EL GESTOR DE DATOS
-    # --------------------------------------------------------
+    # Sección 1: Procesamiento de Accidentes
+    print("Procesamiento de los Accidentes") # Texto meramente informativo, para indicar inicio de la sección
 
     gestor_datos = GestorDatos()
+    # Instancia el gestor encargado de cargar, limpiar y guardar datos de accidentes
 
-    # --------------------------------------------------------
-    # PASO 2: CARGAR EL CSV ORIGINAL
-    # --------------------------------------------------------
 
     datos_originales = gestor_datos.cargar_csv(
         "accidentes_victimas_2018_2024.csv"
     )
+    # Carga el archivo CSV con los datos crudos de accidentes
 
     print("\nArchivo original cargado correctamente.")
 
@@ -69,13 +37,11 @@ def main():
         f"{datos_originales.shape[1]}"
     )
 
-    # --------------------------------------------------------
-    # PASO 3: LIMPIAR LOS DATOS
-    # --------------------------------------------------------
 
     datos_accidentes = gestor_datos.limpiar_datos(
         datos_originales
     )
+    # Aplica las reglas de limpieza y transformacion a los datos originales
 
     print("\nDimensiones despues de la limpieza:")
 
@@ -89,9 +55,6 @@ def main():
         f"{datos_accidentes.shape[1]}"
     )
 
-    # --------------------------------------------------------
-    # PASO 4: COMPROBAR LA VARIABLE GRAVEDAD
-    # --------------------------------------------------------
 
     valores_gravedad = sorted(
         datos_accidentes["gravedad"]
@@ -99,6 +62,7 @@ def main():
         .unique()
         .tolist()
     )
+    # Obtiene y ordena los valores unicos de la variable objetivo gravedad
 
     print("\nValores de gravedad encontrados:")
     print(valores_gravedad)
@@ -111,24 +75,20 @@ def main():
         .sort_index()
     )
 
-    # --------------------------------------------------------
-    # PASO 5: GUARDAR EL CSV DE ACCIDENTES PROCESADO
-    # --------------------------------------------------------
 
     gestor_datos.guardar_csv(
         datos_accidentes,
         "accidentes_victimas_limpio.csv"
     )
+    # Guarda el dataset limpio en un nuevo archivo CSV
 
-    # --------------------------------------------------------
-    # PASO 6: VOLVER A CARGAR EL ARCHIVO PROCESADO
-    # --------------------------------------------------------
 
     accidentes_comprobacion = (
         gestor_datos.cargar_csv_procesado(
             "accidentes_victimas_limpio.csv"
         )
     )
+    # Vuelve a cargar el archivo procesado para verificar su integridades
 
     print("\nComprobacion del archivo de accidentes:")
 
@@ -142,9 +102,6 @@ def main():
         f"{accidentes_comprobacion.shape[1]}"
     )
 
-    # --------------------------------------------------------
-    # PASO 7: COMPROBAR DIA Y MES
-    # --------------------------------------------------------
 
     columnas_temporales = [
         "dia_numero",
@@ -158,28 +115,20 @@ def main():
         .isna()
         .sum()
     )
+    # Evalua la presencia de valores nulos en las variables temporales
 
     print("\nValores vacios en las columnas de dia y mes:")
 
     print(vacios_temporales)
 
-    # ========================================================
-    # SECCION 2: PROCESAMIENTO DE DATOS CLIMATICOS
-    # ========================================================
 
-    print("\n====================================================")
-    print("PROCESAMIENTO DE LOS DATOS CLIMATICOS")
-    print("====================================================")
 
-    # --------------------------------------------------------
-    # PASO 8: CREAR EL CLIENTE DE LA API
-    # --------------------------------------------------------
+    # Sección 2: Procesamiento de Datos Climáticos (API)
+    print("Procesamiento de Datos Climáticos (API)") # Texto meramente informativo, para indicar inicio de la sección
 
     cliente_api = ClienteAPI()
+    # Instancia el cliente encargado de consultar y resumir la API climatica
 
-    # --------------------------------------------------------
-    # PASO 9: CONSTRUIR LA RUTA DEL CSV CLIMATICO
-    # --------------------------------------------------------
 
     carpeta_src = os.path.dirname(
         os.path.abspath(__file__)
@@ -195,13 +144,8 @@ def main():
         "processed",
         "clima_mensual_2018_2024.csv"
     )
+    # Construye la ruta absoluta hacia el archivo del resumen climatico
 
-    # --------------------------------------------------------
-    # PASO 10: CARGAR O GENERAR EL RESUMEN CLIMATICO
-    #
-    # Si el archivo ya existe, se carga directamente.
-    # Si no existe, se consulta Open-Meteo y se genera.
-    # --------------------------------------------------------
 
     if os.path.exists(ruta_clima):
 
@@ -219,6 +163,7 @@ def main():
             sep=";",
             encoding="utf-8-sig"
         )
+        # Carga el archivo climatico directamente desde el almacenamiento local
 
     else:
 
@@ -230,30 +175,29 @@ def main():
             "Se consultara la API historica de Open-Meteo."
         )
 
-        # Consultar los datos diarios de las siete provincias
         datos_clima_diarios = (
             cliente_api.consultar_todas_provincias(
                 fecha_inicio="2018-01-01",
                 fecha_fin="2024-12-31"
             )
         )
+        # Consulta los registros diarios de clima mediante la API
 
-        # Crear el resumen mensual
+
         resumen_clima = (
             cliente_api.resumir_clima_mensual(
                 datos_clima_diarios
             )
         )
+        # Agrupa y calcula el resumen de variables climaticas a nivel mensual
 
-        # Guardar el resumen mensual
+
         cliente_api.guardar_resumen_climatico(
             resumen_mensual=resumen_clima,
             nombre_archivo="clima_mensual_2018_2024.csv"
         )
+        # Guarda el resumen mensual generado en disco
 
-    # --------------------------------------------------------
-    # PASO 11: COMPROBAR EL RESUMEN CLIMATICO
-    # --------------------------------------------------------
 
     print("\nComprobacion del resumen climatico:")
 
@@ -273,31 +217,30 @@ def main():
 
     print(valores_vacios_clima)
 
-    # Comprobar las provincias
+
     provincias_clima = sorted(
         resumen_clima["provincia"]
         .unique()
         .tolist()
     )
+    # Extrae el listado unico de provincias en la informacion climatica
 
     print("\nProvincias climaticas encontradas:")
 
     for provincia in provincias_clima:
         print(f"- {provincia}")
 
-    # Comprobar los años
+
     anios_clima = sorted(
         resumen_clima["anio"]
         .unique()
         .tolist()
     )
+    # Lista los años procesados dentro del resumen de clima
 
     print("\nAños climaticos encontrados:")
     print(anios_clima)
 
-    # --------------------------------------------------------
-    # PASO 12: VALIDAR LAS DIMENSIONES CLIMATICAS
-    # --------------------------------------------------------
 
     if resumen_clima.shape[0] != 588:
         raise ValueError(
@@ -315,33 +258,26 @@ def main():
         raise ValueError(
             "El resumen climatico contiene valores vacios."
         )
+    # Valida la coherencia de dimensiones y la ausencia de nulos en el clima
 
     print(
         "\nEl resumen climatico tiene las dimensiones "
         "correctas."
     )
 
-    # ========================================================
-    # SECCION 3: INTEGRACION CON SQL SERVER
-    # ========================================================
 
-    print("\n====================================================")
-    print("INTEGRACION CON SQL SERVER")
-    print("====================================================")
 
-    # --------------------------------------------------------
-    # PASO 13: CREAR EL GESTOR DE BASE DE DATOS
-    # --------------------------------------------------------
+    # Sección 3: Base de Datos
+
+    print("Integración con SQL Server") # Texto meramente informativo, para indicar inicio de la sección
 
     gestor_bd = GestorBaseDatos()
+    # Instancia el conector y manejador de la base de datos SQL Server
 
     try:
 
-        # ----------------------------------------------------
-        # PASO 14: PROBAR LA CONEXION
-        # ----------------------------------------------------
-
         nombre_base = gestor_bd.probar_conexion()
+        # Verifica la conexion con el servidor SQL Server
 
         print("\nComprobacion de SQL Server:")
 
@@ -350,19 +286,13 @@ def main():
             f"{nombre_base}"
         )
 
-        # ====================================================
-        # CARGA DE LA TABLA ACCIDENTES
-        # ====================================================
-
-        # ----------------------------------------------------
-        # PASO 15: INSERTAR LOS ACCIDENTES
-        # ----------------------------------------------------
 
         accidentes_insertados = (
             gestor_bd.insertar_accidentes(
                 accidentes_comprobacion
             )
         )
+        # Inserta los accidentes limpios en la tabla correspondiente de SQL Server
 
         if accidentes_insertados > 0:
             print(
@@ -370,13 +300,11 @@ def main():
                 f"{accidentes_insertados}"
             )
 
-        # ----------------------------------------------------
-        # PASO 16: COMPROBAR LA TABLA ACCIDENTES
-        # ----------------------------------------------------
 
         total_accidentes_sql = (
             gestor_bd.contar_registros()
         )
+        # Cuenta los registros almacenados en la tabla de accidentes
 
         print("\nComprobacion de la tabla accidentes:")
 
@@ -398,19 +326,13 @@ def main():
                 "no tienen la misma cantidad."
             )
 
-        # ====================================================
-        # CARGA DE LA TABLA CLIMA MENSUAL
-        # ====================================================
-
-        # ----------------------------------------------------
-        # PASO 17: INSERTAR EL RESUMEN CLIMATICO
-        # ----------------------------------------------------
 
         clima_insertado = (
             gestor_bd.insertar_clima_mensual(
                 resumen_clima
             )
         )
+        # Inserta la informacion del resumen climatico en SQL Server
 
         if clima_insertado > 0:
             print(
@@ -418,13 +340,11 @@ def main():
                 f"{clima_insertado}"
             )
 
-        # ----------------------------------------------------
-        # PASO 18: COMPROBAR LA TABLA CLIMA MENSUAL
-        # ----------------------------------------------------
 
         total_clima_sql = (
             gestor_bd.contar_registros_clima()
         )
+        # Obtiene la cantidad de filas cargadas en la tabla clima_mensual
 
         print("\nComprobacion de la tabla clima_mensual:")
 
@@ -444,17 +364,7 @@ def main():
                 "no tienen la misma cantidad."
             )
 
-        # ====================================================
-        # COMPROBACION FINAL
-        # ====================================================
-
-        # ----------------------------------------------------
-        # PASO 19: MOSTRAR EL RESUMEN FINAL
-        # ----------------------------------------------------
-
-        print("\n====================================================")
-        print("RESUMEN FINAL DEL PROCESO")
-        print("====================================================")
+        print("Resumen del Proceso") # Una última comprobación
 
         print(
             f"Accidentes procesados: "
@@ -494,7 +404,6 @@ def main():
 
     except Exception as error:
 
-        # Mostrar cualquier error ocurrido
         print(
             "\nOcurrio un error durante la integracion "
             "con SQL Server:"
@@ -504,19 +413,164 @@ def main():
 
     finally:
 
-        # ----------------------------------------------------
-        # PASO 20: CERRAR LA CONEXION
-        # ----------------------------------------------------
-
         gestor_bd.cerrar_conexion()
+        # Garantiza el cierre de la conexion con SQL Server
 
 
-# ============================================================
-# PUNTO DE ENTRADA DEL PROGRAMA
-#
-# Ejecuta main() solamente cuando este archivo
-# se inicia directamente.
-# ============================================================
+
+    # Sección 4: Análsis Explotatorio de Datos (EDA)
+    print("Análsis Explotatorio de Datos (EDA)") # Texto meramente informativo, para indicar inicio de la sección
+
+    procesador_eda = ProcesadorEDA(accidentes_comprobacion)
+    # Prepara el modulo para generar estadisticas explicativas y tablas de resumen
+
+
+    resumen_general = procesador_eda.resumen_general()
+    # Genera un resumen estadistico descriptivo basico sobre el conjunto de datos
+
+    print("\nResumen general del dataset:")
+    print(resumen_general)
+
+    print("\nTipos de dato por columna:")
+    print(procesador_eda.obtener_tipos_datos())
+
+    print("\nValores vacios por columna:")
+    print(procesador_eda.analizar_valores_vacios())
+
+
+    tabla_por_anio = procesador_eda.accidentes_por_anio()
+    tabla_por_mes = procesador_eda.accidentes_por_mes()
+    tabla_por_dia = procesador_eda.accidentes_por_dia()
+    tabla_por_hora = procesador_eda.accidentes_por_hora()
+    tabla_por_provincia = procesador_eda.accidentes_por_provincia()
+    tabla_por_tipo = procesador_eda.accidentes_por_tipo()
+    tabla_distribucion_gravedad = (
+        procesador_eda.distribucion_gravedad()
+    )
+    tabla_gravedad_provincia = (
+        procesador_eda.gravedad_por_provincia()
+    )
+    tabla_dia_hora = procesador_eda.tabla_dia_hora()
+    tabla_clima_accidentes = (
+        procesador_eda.relacion_accidentes_clima(resumen_clima)
+    )
+    # Construye las aglomeraciones y tablas necesarias para el EDA
+
+    print("\nAccidentes por provincia:")
+    print(tabla_por_provincia)
+
+    print("\nDistribucion de la gravedad:")
+    print(tabla_distribucion_gravedad)
+
+    print("\nPorcentaje de accidentes graves por provincia:")
+    print(tabla_gravedad_provincia)
+
+
+    print("Mapa Interactivo")
+    mapa_accidentes = MapaAccidentes()
+
+    ruta_mapa = mapa_accidentes.crear_mapa_provincias(
+        tabla_gravedad_provincia
+    )
+    # Construye y exporta un archivo HTML con el mapa de severidad por provincia
+
+    print(
+        f"\nMapa interactivo generado en: "
+        f"{ruta_mapa}"
+    )
+
+
+    # Sección 5: Modelado Predictivo
+
+    print("Entrenamiento del Modelo Predictivo") # Texto meramente informativo, para indicar inicio de la sección
+
+    preparador_modelo = PreparadorModelo()
+
+    datos_modelo = preparador_modelo.relacionar_con_clima(
+        accidentes_comprobacion,
+        resumen_clima
+    )
+    # Relaciona el clima con los accidentes
+
+
+    variables_predictoras, variable_objetivo = (
+        preparador_modelo.separar_variables(datos_modelo)
+    )
+    # Separa las variables predictorias y las objetivo
+
+
+    (
+        X_entrenamiento,
+        X_prueba,
+        y_entrenamiento,
+        y_prueba
+    ) = preparador_modelo.dividir_datos(
+        variables_predictoras,
+        variable_objetivo
+    )
+    # Divide el modelo entre el entrenamiento y la prueba
+
+
+    preprocesador = (
+        preparador_modelo.crear_preprocesador()
+    )
+    # Selecciona el preprocesador del modelo
+
+
+    entrenador_modelos = EntrenadorModelos(preprocesador)
+
+    tabla_comparacion = entrenador_modelos.entrenar_todos(
+        X_entrenamiento,
+        y_entrenamiento,
+        X_prueba,
+        y_prueba
+    )
+    # Entrena y evalua todos los modelos configurados
+
+    print("\nComparacion de los tres modelos:")
+    print(tabla_comparacion)
+
+    nombre_mejor_modelo, mejor_pipeline = (
+        entrenador_modelos.seleccionar_mejor_modelo()
+    )
+    # Entrena, compara y selecciona el mejor modelo
+
+
+    guardador_modelo = GuardadorModelo()
+
+    ruta_modelo_guardado = guardador_modelo.guardar_modelo(
+        mejor_pipeline
+    )
+
+    ruta_metricas_guardadas = (
+        guardador_modelo.guardar_metricas(
+            nombre_modelo=nombre_mejor_modelo,
+            metricas=entrenador_modelos.resultados[
+                nombre_mejor_modelo
+            ]
+        )
+    )
+    # Se guarda el mejor modelo y sus métricas
+
+    comprobacion_modelo = guardador_modelo.comprobar_archivo(
+        ruta_modelo_guardado
+    )
+
+    comprobacion_metricas = guardador_modelo.comprobar_archivo(
+        ruta_metricas_guardadas
+    )
+    # Comprueba la existencia y estado de los archivos guardados
+
+    print("\nComprobacion del modelo guardado:")
+    print(comprobacion_modelo)
+
+    print("\nComprobacion de las metricas guardadas:")
+    print(comprobacion_metricas)
+
+    print("Fin del Proceso")
+    # Archivos generados (modelos entrenados)
+
 
 if __name__ == "__main__":
     main()
+# Solo se utiliza cuando se ejecuta, si el código se llama entonces este no toma acción
